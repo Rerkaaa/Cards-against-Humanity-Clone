@@ -5,7 +5,7 @@
     "socket.io": "^4.8.1",
     "sqlite3": "^5.1.7"
   },
-  "name": "cards-against-humaniy",
+  "name": "cards-against-humanity",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
