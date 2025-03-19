@@ -6,7 +6,6 @@ db.serialize(() => {
   db.run('CREATE TABLE IF NOT EXISTS white_cards (text TEXT)');
   db.run('INSERT INTO white_cards (text) VALUES ("A big hug."), ("Pineapple pizza."), ("Chaos.")');
   db.run('INSERT INTO black_cards (text, pick_count) VALUES ("What’s the best gift? ___", 1), ("Why did I fail? ___", 1)');
-  // Add the example black card
   db.run('INSERT INTO black_cards (text, pick_count) VALUES ("Firemaster is now watching ___ and ___ interface.", 2)');
 });
 

@@ -3,7 +3,7 @@ const http = require('http');
 const socketIO = require('socket.io');
 const { startGame, submitCard, nextRound, shuffle } = require('./gameLogic');
 const { addCard, getWhiteCards, getBlackCards, removeCard } = require('./db');
-const fetch = require('node-fetch'); // This works with node-fetch@2
+const fetch = require('node-fetch');
 const path = require('path');
 
 const app = express();
