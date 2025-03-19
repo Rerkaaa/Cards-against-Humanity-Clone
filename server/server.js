@@ -16,17 +16,43 @@ console.log('Serving static files from:', staticPath);
 app.use(express.static(staticPath));
 app.use(express.json());
 
+
 let games = {};
 
-// Socket.IO connection handling
 io.on('connection', (socket) => {
   console.log('Player connected:', socket.id);
 
   socket.on('join-game', (gameId) => {
     socket.join(gameId);
-    if (!games[gameId]) games[gameId] = { players: [], deck: [], state: 'lobby', submissions: [] };
-    games[gameId].players.push(socket.id);
-    io.to(gameId).emit('game-update', games[gameId]);
+    if (!games[gameId]) {
+      games[gameId] = {
+        players: [],
+        deck: [],
+        state: 'lobby',
+        submissions: {},
+        scores: {},
+        blackDeck: [],
+        czarIndex: 0,
+        currentBlackCard: null
+      };
+    }
+    const game = games[gameId];
+    if (!game.players.some(p => p.id === socket.id)) {
+      const role = game.players.length === 0 ? 'Host' : 'Player';
+      game.players.push({ id: socket.id, role });
+      socket.emit('role-assigned', role);
+      if (game.state === 'playing') {
+        const hand = [];
+        while (hand.length < 7 && game.deck.length > 0) {
+          hand.push(game.deck.pop());
+        }
+        socket.emit('update-hand', hand);
+        if (game.currentBlackCard) {
+          socket.emit('new-round', game.currentBlackCard);
+        }
+      }
+    }
+    io.to(gameId).emit('game-update', { ...game, czar: game.players[game.czarIndex]?.id });
     startGame(gameId, io, games);
   });
 
@@ -34,37 +60,50 @@ io.on('connection', (socket) => {
     submitCard(gameId, socket.id, card, games, io);
   });
 
-  socket.on('pick-winner', ({ gameId, winnerCard }) => {
+  socket.on('pick-winner', ({ gameId, card }) => {
     const game = games[gameId];
-    const winner = game.submissions.find(sub => sub.card === winnerCard);
+    const winner = Object.entries(game.submissions).find(([_, cards]) => cards.join('|') === card);
     if (winner) {
       game.scores = game.scores || {};
-      game.scores[winner.playerId] = (game.scores[winner.playerId] || 0) + 1;
-      io.to(gameId).emit('winner', { card: winnerCard, scores: game.scores });
+      game.scores[winner[0]] = (game.scores[winner[0]] || 0) + 1;
+      io.to(gameId).emit('winner', { card, scores: game.scores });
       nextRound(gameId, io, games);
+    }
+  });
+
+  socket.on('kick-player', ({ gameId, playerId }) => {
+    const game = games[gameId];
+    if (!game) return;
+    const requester = game.players.find(p => p.id === socket.id);
+    if (requester && requester.role === 'Host') {
+      game.players = game.players.filter(p => p.id !== playerId);
+      io.to(playerId).emit('kicked');
+      io.to(gameId).emit('game-update', game);
+    }
+  });
+
+  socket.on('end-game', ({ gameId }) => {
+    const game = games[gameId];
+    if (!game) return;
+    const requester = game.players.find(p => p.id === socket.id);
+    if (requester && requester.role === 'Host') {
+      io.to(gameId).emit('game-ended');
+      delete games[gameId];
     }
   });
 
   socket.on('disconnect', () => {
     console.log('Player disconnected:', socket.id);
-  });
-});
-
-// Endpoint to upload a single card
-app.post('/upload-card', async (req, res) => {
-  const { type, text, pickCount } = req.body;
-  try {
-    addCard(type, text, pickCount);
     for (let gameId in games) {
       const game = games[gameId];
-      if (type === 'white') game.deck = shuffle(await getWhiteCards());
-      else if (type === 'black') game.blackDeck = shuffle(await getBlackCards());
+      game.players = game.players.filter(p => p.id !== socket.id);
+      if (game.players.length === 0) {
+        delete games[gameId];
+      } else {
+        io.to(gameId).emit('game-update', game);
+      }
     }
-    res.send('Card added');
-  } catch (error) {
-    console.error('Error uploading card:', error);
-    res.status(500).send('Failed to upload card');
-  }
+  });
 });
 
 // Endpoint to import a deck from CrCast API

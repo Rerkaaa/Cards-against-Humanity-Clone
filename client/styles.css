@@ -1,21 +1,15 @@
-body {
-  font-family: Arial, sans-serif;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.join-section, .upload-section {
-  margin-bottom: 20px;
-}
-
 .card {
-  display: inline-block;
-  padding: 10px;
-  margin: 5px;
   background: white;
   border: 1px solid black;
+  padding: 10px;
+  margin: 5px;
+  display: inline-block;
   cursor: pointer;
+}
+
+.card.selected {
+  background: lightblue;
+  border: 2px solid blue;
 }
 
 .black-card {
@@ -25,11 +19,18 @@ body {
   margin: 10px 0;
 }
 
-.submissions, .hand {
+.hand, .submissions {
   margin: 10px 0;
 }
 
-.status, .winner {
-  margin: 10px 0;
-  font-weight: bold;
+.submission {
+  background: lightgray;
+  padding: 10px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.card.disabled {
+  background: lightgray;
+  cursor: not-allowed;
 }
