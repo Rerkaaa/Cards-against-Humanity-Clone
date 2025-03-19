@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cards Against Humanity Clone</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Cards Against Humanity Clone</h1>
+  
+  <div class="join-section">
+    <input id="game-id" type="text" placeholder="Game ID">
+    <button id="join-btn">Join Game</button>
+  </div>
+  
+  <div id="status" class="status"></div>
+  
+  <div class="game-area">
+    <div id="black-card" class="black-card"></div>
+    <div id="submissions" class="submissions"></div>
+    <div id="hand" class="hand"></div>
+  </div>
+  
+  <div class="upload-section">
+    <h3>Upload Card</h3>
+    <input id="card-text" placeholder="Card text">
+    <select id="card-type" onchange="togglePickCount()">
+      <option value="white">White Card</option>
+      <option value="black">Black Card</option>
+    </select>
+    <input id="pick-count" type="number" min="1" max="3" value="1" style="display:none">
+    <button onclick="uploadCard()">Upload Card</button>
+  </div>
+  
+  <div class="deck-management">
+    <h3>Deck Management</h3>
+    <input id="deck-url" placeholder="Deck URL (e.g., https://cast.clrtd.com/deck/R7XYE)">
+    <button onclick="importDeck()">Import Deck</button>
+    <div id="deck-list"></div> <!-- Display current cards -->
+    <button onclick="loadDeckList()">Refresh Deck List</button>
+  </div>
+  
+  <div id="winner" class="winner"></div>
+  
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+  <script>
+    function togglePickCount() {
+      const type = document.getElementById('card-type').value;
+      document.getElementById('pick-count').style.display = type === 'black' ? 'inline' : 'none';
+    }
+  </script>
+</body>
+</html>

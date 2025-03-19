@@ -1,0 +1,35 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.join-section, .upload-section {
+  margin-bottom: 20px;
+}
+
+.card {
+  display: inline-block;
+  padding: 10px;
+  margin: 5px;
+  background: white;
+  border: 1px solid black;
+  cursor: pointer;
+}
+
+.black-card {
+  background: black;
+  color: white;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.submissions, .hand {
+  margin: 10px 0;
+}
+
+.status, .winner {
+  margin: 10px 0;
+  font-weight: bold;
+}
